@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Dot Mobi - free mobile website template by mobifreaks</title>
+  <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=no" />
+  <link href="style.css" rel="stylesheet" type="text/css" media="all"/>
+  <script type="text/javascript" src="jquery.mobile/jquery-1.7.2.min"></script>
+  <script type="text/javascript" src="funciones.js"></script>
+  <script type="text/javascript" src="errores.js"></script>
+  
+	<script type="text/javascript" src="cordova.js"></script>
+	<script type = text/javascript>
+  function init(){  
+
+  document.addEventListener("deviceready", onDeviceReady, true);
+  }
+
+	function onDeviceReady() {
+	
+	
+		jQuery(".logout").click(function(evento){
+			evento.preventDefault();
+			peticion("logout", function(respuesta){
+				if (respuesta.error == 0){	
+					document.location.href = "index.html";
+					
+				}
+				});
+		
+		   
+		});
+		
+		function pediranio(){
+		
+		
+		var anio = new Date().getFullYear();
+		var anterior = anio-1;
+		var anioelegido;
+		navigator.notification.confirm("Qué año quieres trabajar",  function(respuesta){
+			if (respuesta == 0){
+				pediranio();
+				return;
+			}else if (respuesta == 1){
+				anioelegido = anterior;
+				
+				
+			}else if(respuesta == 2){
+				anioelegido = anio;
+			}
+			peticion("prorrata", function(respuesta){
+				if (respuesta.error == errores.sindatos){
+					jQuery(".prorrata").show();
+					jQuery("[name=anio]").val(anioelegido);
+				}
+			}, {datos: {anio:anioelegido-1}});	
+			
+			peticion("trimestres", function(respuesta){
+				if(respuesta.error == errores.ok){
+					for (var i=0; i < respuesta.trimestres.length; i++){
+						var trimestre = respuesta.trimestres[i];
+						if (trimestre.numerotrimestre == 1){
+							jQuery("[name=gasto_1]").val(trimestre.gasto)
+							jQuery("[name=ingreso_1]").val(trimestre.ingreso)
+						}else if (trimestre.numerotrimestre == 2){
+							jQuery("[name=gasto_2]").val(trimestre.gasto)
+							jQuery("[name=ingreso_2]").val(trimestre.ingreso)
+						}else if (trimestre.numerotrimestre == 3){
+							jQuery("[name=gasto_3]").val(trimestre.gasto)
+							jQuery("[name=ingreso_3]").val(trimestre.ingreso)
+						}else if (trimestre.numerotrimestre == 4){
+							jQuery("[name=gasto_4]").val(trimestre.gasto)
+							jQuery("[name=ingreso_4]").val(trimestre.ingreso)
+						}
+					}
+				}else if (respuesta.error == errores.sesionperdida){
+					alert("Se ha perdido la sesión");
+					document.location.href="index.html";
+				}
+			
+			}, {datos:{"anio":anioelegido}}); //fin petición trimestre
+			
+			
+			
+			}, "Año de trabajo",anterior+","+anio);
+			
+		
+		
+		}
+		
+		pediranio();
+		
+		
+		
+		jQuery("[name=enviar]").click(function(){
+		 var networkState = navigator.connection.type;
+		 alert(networkState);
+		 alert(Connection.NONE);
+		 if (networkState == Connection.NONE){
+		 	alert("no hay conexión a internet");
+		 	transaccion(function(tx){
+		 		tx.executeSql("insert into prorrata(usuario, valor, anio)values(?,?,?)",
+		 		[window.localStorage.getItem("usuarioconectado"), jQuery("#prorrata").val(), jQuery("#anio").val()], function(
+		 			tx, resultado){
+		 			
+		 			alert(resultado.rowsAffected);
+		 			
+		 			}, function(){
+		 			alert("error");
+		 		});
+		 	});
+		 }else{
+		
+			peticion("enviartrimestres", function(respuesta){}, {datos:jQuery("#formulario").serialize(), metodo:"post"});// peticion
+		}
+		});//fin click enviar
+	
+		} //fin onDeviceReady
+	</script>
+</head>
+
+<body class="single" onload="init()">
+  <div class="wrap">
+    <header>
+    	<div class="logo">
+    		<a href="index.html">
+    			<img src="images/logo.png"/>
+    		</a>
+    	</div>   
+		<nav class="vertical menu">
+
+        </nav>
+    </header>
+    <FORM action="index1" method="post" id="formulario">
+    <div class="prorrata" style="display:none">
+    <P>
+    <br>
+    
+    <LABEL for="username">Valor prorrata: </LABEL><BR>
+              <INPUT type="text" id="prorrata" name="prorrata"><BR>
+   
+              <INPUT type="hidden" id="anio" name="anio">
+    
+    </P>
+    </div>
+    <div class="trimestre1 trimestre">
+    	<label for="gasto_1">Gastos primer trimestre</label><BR><input type="text" name="gasto_1"/><br>
+    	<label for="gasto_1">Ingresos primer trimestre</label><BR><input type="text" name="ingreso_1"/>
+    </div>
+    
+    <div class="trimestre2 trimestre">
+    	<label for="gasto_2">Gastos segundo trimestre</label><BR><input type="text" name="gasto_2"/><br>
+    	<label for="gasto_2">Ingresos segundo trimestre</label><BR><input type="text" name="ingreso_2"/>
+    </div>
+    
+    <div class="trimestre3 trimestre">
+    	<label for="gasto_3">Gastos tercer trimestre</label><BR><input type="text" name="gasto_3"/><br>
+    	<label for="gasto_3">Ingresos tercer trimestre</label><BR><input type="text" name="ingreso_3"/>
+    </div>
+    
+    <div class="trimestre4 trimestre">
+    	<label for="gasto_4">Gastos cuarto trimestre</label><BR><input type="text" name="gasto_4"/><br>
+    	<label for="gasto_4">Ingresos cuarto trimestre</label><BR><input type="text" name="ingreso_4"/>
+    </div>
+    <center><INPUT type="button" name="enviar" value="Enviar"> 
+
+    </center>
+ </FORM>
+	
+    <footer>
+    	<p>- </p>
+    	
+    </footer>
+  </div>
+</body>
+</html>

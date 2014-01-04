@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<script type="text/javascript" src="jquery.mobile/jquery-1.7.2.min"></script>
+	<script type="text/javascript" src="cordova.js"></script>
+	<script type="text/javascript" src="funciones.js"></script>
+	<script type="text/javascript" src="errores.js"></script>
+	<script type = text/javascript>
+  function init(){  
+
+  document.addEventListener("deviceready", onDeviceReady, true)}
+
+	function onDeviceReady() {
+	
+	creartablas();
+	
+    	// Ahora es seguro utilizar la API PhoneGap
+    	
+    	
+    	jQuery("input[name=registrarse]").click(function(){
+    	document.location.href="registrarse.html";    	
+    	});
+    	var tokenpedido=false;
+    	jQuery("input[name=enviar]").click(function(){ 
+    	function hacerlogin(){
+    	peticion('login',function(respuesta){
+    		if (respuesta.error == errores.ok){
+    			if (jQuery("#verificacion").attr("checked")){ //si se ha tickado la casilla de guardar usuario
+    				 window.localStorage.setItem("usuario",jQuery("#username").val());
+    				 window.localStorage.setItem("password",jQuery("#pass").val());    				
+    			}
+    			 window.localStorage.setItem("usuarioconectado",jQuery("#username").val()); //guardo como cache
+    			 
+    			
+    			document.location.href="menu.html";
+    		}else{
+    			alert("login error" + respuesta.error);
+    		}
+    		},{metodo:"post", datos:jQuery('#formulario').serialize()});
+    		
+    		}// hacerlogin
+    		
+    		if (tokenpedido==false){
+    			pedirtoken(function(respuesta){
+    			jQuery('#formulario').append(respuesta);
+    			tokenpedido=true;
+    			hacerlogin();
+    			});
+    		}else{
+    			hacerlogin();
+    		}
+    	
+    	
+    	
+    	});
+    	
+    	
+    	
+    		  		
+    		
+    
+    	
+    	
+    	if (window.localStorage.getItem("usuario")){ //Si ya tengo usuario guardado
+    		jQuery("#username").val(window.localStorage.getItem("usuario"));
+    		jQuery("#pass").val(window.localStorage.getItem("password"));
+    		jQuery("input[name=enviar]").click();
+    		
+    	}
+    
+    
+	} //fin addListener
+	</script>
+	<title>IVApp</title>
+	<link href="style.css" rel="stylesheet" type="text/css" media="all"/>
+</head>
+
+<body onload="init()">
+	<header>
+		<center><h1>IVApp</h1></center>
+		<div class="logo">
+    		<a href="index.html">
+    			<img src="images/logo.png">
+    		</a>
+    	</div>   
+	</header>
+	<form action="index1" method="post" id="formulario">
+    <p>
+    <br>
+    <label for="username">Nombre de usuario: </label>
+    <input type="text" id="username" name="usuario"><BR>
+    <LABEL for="pass">Contraseña: </LABEL>
+    <INPUT type="password" id="pass" name="password"><BR>
+    <input type="checkbox" id="verificacion" name="verificacion">Guardar usuario<br>
+    <center><INPUT type="button" name="enviar" value="Enviar"> <INPUT type="reset">
+    <input type="button" name="registrarse" value="registrarse">
+    </center>
+    </P>
+ </FORM>
+</body>

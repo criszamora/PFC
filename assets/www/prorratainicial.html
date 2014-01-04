@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<script type="text/javascript" src="jquery.mobile/jquery-1.7.2.min"></script>
+	<script type="text/javascript" src="cordova.js"></script>
+	<script type="text/javascript" src="funciones.js"></script>
+	<script type="text/javascript" src="errores.js"></script>
+	<script type = text/javascript>
+  function init(){  
+
+  document.addEventListener("deviceready", onDeviceReady, true);
+  }
+
+	function onDeviceReady() {
+	
+	var p = parametros();
+	
+	jQuery("#anio").val(p.anio);
+	
+	pedirtoken(function(respuesta){
+		jQuery("#formulario").append(respuesta);
+	
+	});
+	jQuery("[name=enviar]").click(function(){
+
+		peticion("registrarprorrata",function(respuesta){},{datos:jQuery("#formulario").serialize(),metodo:"post"});
+	
+	});
+    	}
+	</script>
+	<title>IVApp</title>
+	<link href="style.css" rel="stylesheet" type="text/css" media="all"/>
+</head>
+
+<body onload="init()">
+	<header>
+		<center><h1>IVApp</h1></center>
+		<div class="logo">
+    		<a href="index.html">
+    			<img src="images/logo.png" alt="logo by mobifreaks"/>
+    		</a>
+    	</div>   
+	</header>
+	<FORM action="index1" method="post" id="formulario">
+    <P>
+    <br>
+    <LABEL for="username">Valor prorrata: </LABEL>
+              <INPUT type="text" id="prorrata" name="prorrata"><BR>
+   
+              <INPUT type="hidden" id="anio" name="anio"><BR>
+    <center><INPUT type="button" name="enviar" value="Enviar"> 
+
+    </center>
+    </P>
+ </FORM>
+</body>
